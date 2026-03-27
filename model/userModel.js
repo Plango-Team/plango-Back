@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+  role: {
+    type: String,
+    enum: ["user", "orgnization", "admin"],
+    default: "user",
+  },
   name: {
     type: String,
     required: [true, "user name is required"],
@@ -25,17 +30,16 @@ const userSchema = new mongoose.Schema({
   },
   resetTokenExpire: {
     type: Date,
-    default: Date.now,
   },
   avatar: {
     type: String,
-    default: "../public/profile.png",
+    default: "",
   },
   isPremium: {
     type: Boolean,
     default: false,
   },
-  creatDate: {
+  CreatedAt: {
     type: Date,
     default: Date.now,
   },

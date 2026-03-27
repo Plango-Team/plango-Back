@@ -23,9 +23,21 @@ const appointmentSchema = new mongoose.Schema({
     type: String,
     required: [true, "transportation method is required"],
   },
+  expectedTravelTime: {
+    type: Number,
+    required: [true, "expected travel time is required"],
+  },
+  preferredArrivalTime: {
+    type: Date,
+    required: [true, "preferred arrival time is required"],
+  },
   isFrequency: {
     type: Boolean,
     default: false,
+  },
+  frequency: {
+    type: String,
+    enum: ["daily", "weekly", "monthly"],
   },
   CreatedAt: {
     type: Date,
