@@ -24,6 +24,10 @@ const taskSchema = new mongoose.Schema({
     type: String,
     require: [true, "task should have priorty"],
   },
+  CreatedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Task = mongoose.model("Task", taskSchema);
