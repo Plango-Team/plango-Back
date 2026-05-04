@@ -4,6 +4,7 @@ const { hashValue, randomToken, signToken, hoursFromNow } = require('../utils/he
 const { sendOtp, verifyOtp } = require('./otp.service');
 const emailService = require('./email.service');
 const { config } = require('../config');
+const { t } = require('../utils/i18n');
 
 const PRIVATE_FIELDS = '+password +otp +otpExpires +otpType +emailVerificationToken +emailVerificationExpires +passwordResetToken +passwordResetExpires +emailChangeToken +emailChangeExpires +newEmail +newPhone +passwordChangedAt +isActive';
 
@@ -14,23 +15,23 @@ const buildUrl = (path, token) => `${config.clientUrl}/${path}?token=${token}`;
 // Throw if account is deactivated
 const checkIsActive = (user) => {
   if (!user.isActive) {
-    throw new AppError('Your account has been deactivated. Contact support.', 403, 'DEACTIVATED');
+    throw new AppError(t(user.lang, 'DEACTIVATED'), 403, 'DEACTIVATED');
   }
 };
 
 // Throw if email isn't verified yet
-const checkEmailVerified = (user) => {
+const checkEmailVerified = (user, lang) => {
   if (!user.isEmailVerified) {
-    throw new AppError('Please verify your email before logging in.', 403, 'EMAIL_NOT_VERIFIED');
+    throw new AppError(t(lang, 'EMAIL_NOT_VERIFIED'), 403, 'EMAIL_NOT_VERIFIED');
   }
 };
 
 // ── Per-action cooldown check ─────────────────────────────
-const checkCooldown = (allowedAt, actionLabel) => {
+const checkCooldown = (allowedAt, actionLabel, lang) => {
   if (!allowedAt || allowedAt <= Date.now()) return; // no cooldown active
   const hours = Math.ceil((allowedAt - Date.now()) / (1000 * 60 * 60));
   throw new AppError(
-    `You can perform ${actionLabel} again after ${hours} hour(s).`,
+    t(lang, 'ACTION_COOLDOWN', { hours }),
     429,
     'ACTION_COOLDOWN'
   );
@@ -39,11 +40,11 @@ const checkCooldown = (allowedAt, actionLabel) => {
 // ── Auth Actions ──────────────────────────────────────────
 
 // Register a new user
-const register = async ({ name, email, password, role = 'user', phone }) => {
+const register = async ({ name, email, password, role = 'user', phone  ,lang}) => {
   // Make sure no one already has this email
   const existing = await User.findOne({ email });
   if (existing) {
-    throw new AppError('An account with this email already exists.', 409, 'EMAIL_TAKEN');
+    throw new AppError(t(lang , 'EMAIL_TAKEN'), 409, 'EMAIL_TAKEN');
   }
 
   // Create a random token, hash it, and store the hash
@@ -64,13 +65,13 @@ const register = async ({ name, email, password, role = 'user', phone }) => {
 
   // Send verification link with the raw token
   const url = buildUrl('verify-email', rawToken);
-  await emailService.sendVerificationEmail(user, url);
+  await emailService.sendVerificationEmail(user, url, lang);
 
   return user.toSafeObject();
 };
 
 // Verify email from the link clicked in the inbox
-const verifyEmail = async (rawToken) => {
+const verifyEmail = async (rawToken, lang) => {
   const hashedToken = hashValue(rawToken);
 
   // Find user with this token who hasn't expired yet
@@ -80,7 +81,7 @@ const verifyEmail = async (rawToken) => {
   });
 
   if (!user) {
-    throw new AppError('Invalid or expired verification link.', 400, 'INVALID_TOKEN');
+    throw new AppError(t(lang, 'VERIFY_EMAIL_INVALID'), 400, 'INVALID_TOKEN');
   }
 
   // Mark email as verified and clear the token
@@ -93,7 +94,7 @@ const verifyEmail = async (rawToken) => {
 };
 
 // Resend a new verification email
-const resendVerification = async (email) => {
+const resendVerification = async (email, lang) => {
   const user = await User.findOne({ email });
 
   // Return silently even if user not found — prevents email enumeration
@@ -104,11 +105,11 @@ const resendVerification = async (email) => {
   user.emailVerificationExpires = hoursFromNow(24);
   await user.save({ validateBeforeSave: false });
 
-  await emailService.sendVerificationEmail(user, buildUrl('verify-email', rawToken));
+  await emailService.sendVerificationEmail(user, buildUrl('verify-email', rawToken), lang);
 };
 
 // Log in with email + password
-const login = async ({ email, password }) => {
+const login = async ({ email, password } , lang) => {
   // Fetch user with password (hidden by default)
   const user = await User.findOne({ email }).select(PRIVATE_FIELDS);
 
@@ -116,14 +117,14 @@ const login = async ({ email, password }) => {
   const passwordMatch = user ? await user.comparePassword(password) : false;
 
   if (!user || !passwordMatch) {
-    throw new AppError('Invalid email or password.', 401, 'INVALID_CREDENTIALS');
+    throw new AppError(t(lang, 'INVALID_CREDENTIALS'), 401, 'INVALID_CREDENTIALS');
   }
 
-  checkIsActive(user);
-  checkEmailVerified(user);
+  checkIsActive(user, lang);
+  checkEmailVerified(user, lang);
 
   if (user.provider !== 'local') {
-    throw new AppError('This account uses Google sign-in. Please continue with Google.', 400, 'WRONG_PROVIDER');
+    throw new AppError(t(lang, 'WRONG_PROVIDER'), 400, 'WRONG_PROVIDER');
   }
 
   user.lastLoginAt = new Date();
@@ -135,8 +136,8 @@ const login = async ({ email, password }) => {
 };
 
 // Called after Google OAuth succeeds — issue a single JWT
-const googleLogin = async (googleUser) => {
-  checkIsActive(googleUser);
+const googleLogin = async (googleUser, lang) => {
+  checkIsActive(googleUser, lang);
 
   googleUser.lastLoginAt = new Date();
   await googleUser.save({ validateBeforeSave: false });
@@ -146,7 +147,7 @@ const googleLogin = async (googleUser) => {
 };
 
 // Send a password reset link via email
-const forgotPassword = async (email) => {
+const forgotPassword = async (email, lang) => {
   const user = await User.findOne({ email });
 
   // Silent success — don't reveal whether email exists
@@ -157,21 +158,21 @@ const forgotPassword = async (email) => {
   user.passwordResetExpires = hoursFromNow(1);
   await user.save({ validateBeforeSave: false });
 
-  await emailService.sendPasswordResetEmail(user, buildUrl('reset-password', rawToken));
+  await emailService.sendPasswordResetEmail(user, buildUrl('reset-password', rawToken), lang);
 };
 
 // Send a password reset OTP via WhatsApp
-const forgotPasswordOtp = async (phone) => {
+const forgotPasswordOtp = async (phone, lang) => {
   const user = await User.findOne({ phone, isPhoneVerified: true });
 
   // Silent success — don't reveal whether phone exists
   if (!user || user.provider !== 'local') return;
 
-  await sendOtp(user, 'reset_password', phone);
+  await sendOtp(user, 'reset_password', phone ,lang);
 };
 
 // Reset password using the email token
-const resetPasswordWithToken = async (rawToken, newPassword) => {
+const resetPasswordWithToken = async (rawToken, newPassword , lang) => {
 
   checkCooldown(user.passwordChangeAllowedAt, 'password change');
 
@@ -181,7 +182,7 @@ const resetPasswordWithToken = async (rawToken, newPassword) => {
   }).select(PRIVATE_FIELDS);
 
   if (!user) {
-    throw new AppError('Invalid or expired reset link.', 400, 'INVALID_TOKEN');
+    throw new AppError(t(lang, 'RESET_TOKEN_INVALID'), 400, 'INVALID_TOKEN');
   }
 
   user.password = newPassword;
@@ -191,15 +192,15 @@ const resetPasswordWithToken = async (rawToken, newPassword) => {
   await user.save();
 
   // Notify user of the change
-  emailService.sendSecurityAlertEmail(user, 'Password changed').catch(() => {});
+  emailService.sendSecurityAlertEmail(user, 'Password changed', lang).catch(() => {});
 };
 
 // Reset password using the WhatsApp OTP
-const resetPasswordWithOtp = async (phone, submittedOtp, newPassword) => {
+const resetPasswordWithOtp = async (phone, submittedOtp, newPassword, lang) => {
 
-  checkCooldown(user.passwordChangeAllowedAt, 'password change');
+  checkCooldown(user.passwordChangeAllowedAt, 'password change', lang);
   const user = await User.findOne({ phone }).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('No account found with this phone.', 400, 'USER_NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NO_ACCOUNT_PHONE'), 400, 'USER_NOT_FOUND');
 
   await verifyOtp(user, submittedOtp, 'reset_password');
 
@@ -207,46 +208,46 @@ const resetPasswordWithOtp = async (phone, submittedOtp, newPassword) => {
   user.setPasswordCooldown(); 
   await user.save();
 
-  emailService.sendSecurityAlertEmail(user, 'Password changed via WhatsApp').catch(() => {});
+  emailService.sendSecurityAlertEmail(user, 'Password changed via WhatsApp', lang).catch(() => {});
 };
 
 // Change password while logged in
-const changePassword = async (userId, currentPassword, newPassword) => {
+const changePassword = async (userId, currentPassword, newPassword, lang) => {
   const user = await User.findById(userId).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'USER_NOT_FOUND'), 404, 'NOT_FOUND');
 
   // Only the password change action is restricted — nothing else
-  checkCooldown(user.passwordChangeAllowedAt, 'password change');
+  checkCooldown(user.passwordChangeAllowedAt, 'password change', lang);
 
   if (!(await user.comparePassword(currentPassword))) {
-    throw new AppError('Current password is incorrect.', 400, 'WRONG_PASSWORD');
+    throw new AppError(t(lang, 'WRONG_PASSWORD'), 400, 'WRONG_PASSWORD');
   }
 
   user.password = newPassword;
   user.setPasswordCooldown(); // prevent another password change for 24h
   await user.save();
 
-  emailService.sendSecurityAlertEmail(user, 'Password changed').catch(() => {});
+  emailService.sendSecurityAlertEmail(user, 'Password changed', lang).catch(() => {});
 };
 
 // Send a verification OTP to a phone number
-const sendPhoneOtp = async (userId, phone) => {
+const sendPhoneOtp = async (userId, phone, lang) => {
   const user = await User.findById(userId).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
   // Make sure no other account uses this phone
   const taken = await User.findOne({ phone, _id: { $ne: userId } });
-  if (taken) throw new AppError('This phone number is already in use.', 409, 'PHONE_TAKEN');
+  if (taken) throw new AppError(t(lang, 'PHONE_TAKEN'), 409, 'PHONE_TAKEN');
 
-  await sendOtp(user, 'verify_phone', phone);
+  await sendOtp(user, 'verify_phone', phone , lang);
 };
 
 // Verify phone OTP and mark phone as verified
-const verifyPhone = async (userId, phone, submittedOtp) => {
+const verifyPhone = async (userId, phone, submittedOtp, lang) => {
   const user = await User.findById(userId).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
-  await verifyOtp(user, submittedOtp, 'verify_phone');
+  await verifyOtp(user, submittedOtp, 'verify_phone', lang);
 
   user.phone = phone;
   user.isPhoneVerified = true;
@@ -256,19 +257,19 @@ const verifyPhone = async (userId, phone, submittedOtp) => {
 };
 
 // Request an email change — sends confirmation to the new email
-const requestEmailChange = async (userId, newEmail, password) => {
+const requestEmailChange = async (userId, newEmail, password, lang) => {
 
   const user = await User.findById(userId).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
   if(!(await user.comparePassword(password))) {
-    throw new AppError('Password is incorrect.', 400, 'WRONG_PASSWORD');
+    throw new AppError(t(lang, 'WRONG_PASSWORD'), 400, 'WRONG_PASSWORD');
   }
 
-  checkCooldown(user.emailChangeAllowedAt, 'email change');
+  checkCooldown(user.emailChangeAllowedAt, 'email change', lang);
 
   const taken = await User.findOne({ email: newEmail.toLowerCase() });
-  if (taken) throw new AppError('This email is already in use.', 409, 'EMAIL_TAKEN');
+  if (taken) throw new AppError(t(lang, 'EMAIL_TAKEN') , 409, 'EMAIL_TAKEN');
 
   const rawToken = randomToken();
   user.emailChangeToken = hashValue(rawToken);
@@ -281,13 +282,13 @@ const requestEmailChange = async (userId, newEmail, password) => {
 };
 
 // Confirm email change from the link clicked in the new inbox
-const confirmEmailChange = async (rawToken) => {
+const confirmEmailChange = async (rawToken,lang) => {
   const user = await User.findOne({
     emailChangeToken: hashValue(rawToken),
     emailChangeExpires: { $gt: Date.now() },
   }).select(PRIVATE_FIELDS);
 
-  if (!user) throw new AppError('Invalid or expired email change link.', 400, 'INVALID_TOKEN');
+  if (!user) throw new AppError(t('EMAIL_CHANGE_INVALID'), 400, 'INVALID_TOKEN');
 
   const oldEmail = user.email;
   user.email = user.newEmail;
@@ -299,36 +300,36 @@ const confirmEmailChange = async (rawToken) => {
   await user.save({ validateBeforeSave: false });
 
   // Alert old email address of the change
-  emailService.sendSecurityAlertEmail({ ...user.toObject(), email: oldEmail }, 'Email address changed').catch(() => {});
+  emailService.sendSecurityAlertEmail({ ...user.toObject(), email: oldEmail }, 'Email address changed', lang).catch(() => {});
 };
 
 // Send OTP to a new phone number to confirm the change
-const requestPhoneChange = async (userId, newPhone, password) => {
+const requestPhoneChange = async (userId, newPhone, password, lang) => {
   const user = await User.findById(userId).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
   if(!(await user.comparePassword(password))) {
-    throw new AppError('Password is incorrect.', 400, 'WRONG_PASSWORD');
+    throw new AppError(t(lang, 'WRONG_PASSWORD'), 400, 'WRONG_PASSWORD');
   }
 
   // Only phone changes are restricted — nothing else is affected
-  checkCooldown(user.phoneChangeAllowedAt, 'phone change');
+  checkCooldown(user.phoneChangeAllowedAt, 'phone change', lang);
 
   const taken = await User.findOne({ phone: newPhone, _id: { $ne: userId } });
-  if (taken) throw new AppError('This phone is already in use.', 409, 'PHONE_TAKEN');
+  if (taken) throw new AppError(t(lang, 'PHONE_TAKEN'), 409, 'PHONE_TAKEN');
 
   user.newPhone = newPhone;
   await user.save({ validateBeforeSave: false });
 
-  await sendOtp(user, 'change_phone', newPhone);
+  await sendOtp(user, 'change_phone', newPhone , lang);
 };
 
 // Confirm phone change by verifying the OTP sent to the new number
-const confirmPhoneChange = async (userId, submittedOtp) => {
+const confirmPhoneChange = async (userId, submittedOtp, lang) => {
   const user = await User.findById(userId).select(PRIVATE_FIELDS);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
-  await verifyOtp(user, submittedOtp, 'change_phone');
+  await verifyOtp(user, submittedOtp, 'change_phone',lang);
 
   user.phone = user.newPhone;
   user.newPhone = undefined;
@@ -336,19 +337,19 @@ const confirmPhoneChange = async (userId, submittedOtp) => {
   user.setPhoneCooldown(); // prevent another phone change for 24h
   await user.save({ validateBeforeSave: false });
 
-  emailService.sendSecurityAlertEmail(user, 'Phone number changed').catch(() => {});
+  emailService.sendSecurityAlertEmail(user, 'Phone number changed', lang).catch(() => {});
 };
 
 // Get logged-in user's profile
-const getProfile = async (userId) => {
+const getProfile = async (userId, lang) => {
   const user = await User.findById(userId);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
   return user.toSafeObject();
 };
 
-const updateName = async (userId, newName) => {
+const updateName = async (userId, newName, lang) => {
   const user = await User.findById(userId);
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
   user.name = newName;
   await user.save();
@@ -356,18 +357,20 @@ const updateName = async (userId, newName) => {
   return user.toSafeObject();
 }
 
-const deleteAccount = async (userId, password) => {
+const deleteAccount = async (userId, password, lang) => {
   const user = await User.findById(userId).select('+password');
-  if (!user) throw new AppError('User not found.', 404, 'NOT_FOUND');
+  if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
 
   if (!(await user.comparePassword(password))) {
-    throw new AppError('Password is incorrect.', 400, 'WRONG_PASSWORD');
+    throw new AppError(t(lang, 'WRONG_PASSWORD'), 400, 'WRONG_PASSWORD');
   }
   
   user.isActive = false;
   await user.save({ validateBeforeSave: false });
 
-  emailService.sendSecurityAlertEmail(user, 'Account deactivated').catch(() => {});
+  // emailService.sendSecurityAlertEmail(user, 'Account deactivated', lang).catch(() => {});
+  emailService.sendDeleteAccountEmail(user, lang).catch(() => {});
+
 };
 
 module.exports = {

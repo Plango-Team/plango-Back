@@ -22,41 +22,41 @@
     .footer { background: #f7fafc; padding: 20px 40px; text-align: center; font-size: 12px; color: #a0aec0; }
   </style>
 </head>
-<body>
+<body dir="rtl">
   <div class="wrap">
     <div class="card">
 
       <div class="header">
-        <h1>⚠️ Security Alert</h1>
-        <p>Sensitive change detected on your account</p>
+        <h1>⚠️ تنبيه أمني</h1>
+        <p>تم رصد تغيير حساس على حسابك</p>
       </div>
 
       <div class="body">
-        <h2>Hi {{name}},</h2>
-        <p>A security-sensitive action was performed on your account:</p>
+        <h2>مرحباً {{name}}،</h2>
+        <p>تم تنفيذ إجراء حساس أمنيًا على حسابك:</p>
 
         <div class="info-row">
-          <span>Action</span>
+          <span>الإجراء</span>
           <strong>{{action}}</strong>
         </div>
         <div class="info-row">
-          <span>Time</span>
+          <span>الوقت</span>
           <strong>{{time}}</strong>
         </div>
 
         <div class="lock-box">
-          🔒 <strong>Your account has been temporarily locked for {{lockHours}} hours.</strong><br />
-          During this time sensitive changes are blocked. This protects you if someone else made this change.
+          🔒 <strong>تم قفل حسابك مؤقتًا لمدة {{lockHours}} ساعة.</strong><br />
+          خلال هذه الفترة، ستُمنع التغييرات الحساسة. هذا يحميك في حال أجرى شخص آخر هذا التغيير.
         </div>
 
         <div class="action-box">
-          ✅ <strong>Was this you?</strong> No action needed. Your account unlocks automatically after the lock period.<br /><br />
-          ❌ <strong>Wasn't you?</strong> Contact support immediately to secure your account.
+          ✅ <strong>هل أنت من قام بذلك؟</strong> لا حاجة لأي إجراء. سيُفتح حسابك تلقائيًا بعد انتهاء فترة القفل.<br /><br />
+          ❌ <strong>لم تكن أنت؟</strong> تواصل مع الدعم فورًا لتأمين حسابك.
         </div>
       </div>
 
       <div class="footer">
-        &copy; PlanGo &nbsp;·&nbsp; Automated security notification. Do not reply.
+        &copy; PlanGo &nbsp;·&nbsp; إشعار أمني آلي. لا تردّ على هذا البريد.
       </div>
 
     </div>

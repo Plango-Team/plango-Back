@@ -5,8 +5,9 @@ const twilio = require("twilio");
 
 // ── Twilio (plain text) ───────────────────────────────────
 
-const sendViaTwilio = async (to, otp, type) => {
+const sendViaTwilio = async (to, otp, type , lang) => {
   const { accountSid, authToken, from } = config.whatsapp.twilio;
+  if(!lang) lang = 'ar';
 
   // In development with no credentials, just log the OTP
   if (!accountSid) {
@@ -18,10 +19,14 @@ const sendViaTwilio = async (to, otp, type) => {
 
   // Build a human-readable message for each OTP type
   const expires = config.otpExpiresMinutes;
-  const messages = {
-    verify_phone: `Your phone verification code is: *${otp}*\nExpires in ${expires} minutes.`,
+  const messages = lang === 'en' ? {
+    verify_phone:   `Your phone verification code is: *${otp}*\nExpires in ${expires} minutes.`,
     reset_password: `Your password reset code is: *${otp}*\nExpires in ${expires} minutes.`,
-    change_phone: `Your phone change code is: *${otp}*\nExpires in ${expires} minutes.`,
+    change_phone:   `Your phone change code is: *${otp}*\nExpires in ${expires} minutes.`,
+  } : {
+    verify_phone:   `رمز التحقق من هاتفك هو: *${otp}*\nينتهي خلال ${expires} دقيقة.`,
+    reset_password: `رمز إعادة تعيين كلمة المرور هو: *${otp}*\nينتهي خلال ${expires} دقيقة.`,
+    change_phone:   `رمز تغيير الهاتف هو: *${otp}*\nينتهي خلال ${expires} دقيقة.`,
   };
 
   //  validation
@@ -48,7 +53,7 @@ const sendViaTwilio = async (to, otp, type) => {
 // Example template body (what Meta shows the user):
 //   "Your verification code is {{1}}. It expires in {{2}} minutes."
 
-const sendViaMeta = (to, otp, type) => {
+const sendViaMeta = (to, otp, type, lang) => {
   const { token, phoneNumberId, languageCode, templates } =
     config.whatsapp.meta;
 
@@ -137,15 +142,15 @@ const sendViaMeta = (to, otp, type) => {
   });
 };
 
-const sendWhatsAppOtp = (phone, otp, type) => {
+const sendWhatsAppOtp = (phone, otp, type, lang) => {
   // const provider = config.whatsapp.provider;
 
   // if (provider === 'meta') {
-  //   return sendViaMeta(phone, otp, type);
+  //   return sendViaMeta(phone, otp, type, lang);
   // }
 
   // Default: Twilio
-  return sendViaTwilio(phone, otp, type);
+  return sendViaTwilio(phone, otp, type, lang);
 };
 
 module.exports = { sendWhatsAppOtp };

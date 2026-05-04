@@ -26,7 +26,6 @@ const generateOtp = () => {
 // ── JWT ───────────────────────────────────────────────────
 
 // Sign a JWT for the given user (called on login and Google OAuth)
-// Default expiry is 7 days — set JWT_EXPIRES_IN in .env to override
 const signToken = (userId, role) => {
   return jwt.sign(
     { sub: userId, role },

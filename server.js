@@ -1,32 +1,45 @@
 require('dotenv').config();
-const dotenv = require('dotenv');
-dotenv.config({path : './.env'})
-const express = require('express');
-const mongoose =require('mongoose');
 
 
+const app = require('./src/app');
+const connectDB = require('./src/config/db');
+const { config } = require('./src/config');
 
+const start = async () => {
+  // Connect to MongoDB before starting the server
+  await connectDB();
 
-const app = require('./app');
+  const server = app.listen(config.port, () => {
+    console.log(`\n🚀 Server running on port ${config.port} [${config.nodeEnv}]`);
+    console.log(`📋 Health check: http://localhost:${config.port}/health`);
+    console.log(`🔐 Auth API:     http://localhost:${config.port}/api/auth\n`);
+  });
 
+  // ── Graceful Shutdown ──────────────────────────────────
+  // When the process is killed, close connections cleanly
+  const shutdown = (signal) => {
+    console.log(`\n${signal} received — shutting down gracefully...`);
+    server.close(() => {
+      console.log('✅ Server closed');
+      process.exit(0);
+    });
 
+    // Force exit if it takes too long
+    setTimeout(() => process.exit(1), 10_000);
+  };
 
-const DB = process.env.DATABASE.replace('<PASSWORD>',process.env.DATABASE_PASSWORD);
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 
-mongoose.set('autoIndex',true);
-mongoose.connect(DB).then(()=>{
-  console.log('DB connected !');
+  // Log unhandled errors instead of crashing silently
+  process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Rejection:', err);
+  });
 
-});
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1);
+  });
+};
 
-
-
-const port = process.env.PORT || 3000; 
-const server = app.listen(port, ()=>{
-console.log(`Server is running on http://localhost:${port}`);
-});
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
-});
-
-
+start();
