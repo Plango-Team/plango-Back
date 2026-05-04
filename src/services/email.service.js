@@ -78,24 +78,35 @@ const sendSecurityAlertEmail = (user, action, lang = 'ar') =>
     },
   });
 
-  const sendDeleteAccountEmail = (user, rawToken, lang = 'ar') =>
-  sendEmail({
+ const sendDeleteAccountEmail = (user, lang = 'ar') => {
+  const isAr = lang === 'ar';
+
+  const formattedDate = new Date().toLocaleString(
+    isAr ? 'ar-EG' : 'en-US',
+    {
+      year: 'numeric',
+      month: isAr ? 'long' : 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+  );
+
+  return sendEmail({
     to: user.email,
     subject: t(lang, 'EMAIL_SUBJECT_DELETE_ACCOUNT'),
-    template: lang === 'ar' ? 'accountDeletion-ar' : 'accountDeletion',
+    template: isAr ? 'accountDeleted-ar' : 'accountDeleted',
     variables: {
       name: user.name,
-      action: 'Account Deletion Requested',
-      time: new Date().toUTCString(),
-      graceHours: config.deletionGraceHours,
-      cancelLink: `${config.clientUrl}/cancel-delete?token=${rawToken}`,
+      time: formattedDate,
     },
   });
+};
 
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendEmailChangeEmail,
   sendSecurityAlertEmail,
-  // sendDeleteAccountEmail,
+  sendDeleteAccountEmail,
 };

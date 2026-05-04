@@ -368,7 +368,9 @@ const deleteAccount = async (userId, password, lang) => {
   user.isActive = false;
   await user.save({ validateBeforeSave: false });
 
-  emailService.sendSecurityAlertEmail(user, 'Account deactivated', lang).catch(() => {});
+  // emailService.sendSecurityAlertEmail(user, 'Account deactivated', lang).catch(() => {});
+  emailService.sendDeleteAccountEmail(user, lang).catch(() => {});
+
 };
 
 module.exports = {
