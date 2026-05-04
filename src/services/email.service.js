@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const { config } = require('../config');
-
+const { t } = require('../utils/i18n');
 // Create one reusable mail transport
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Load an HTML template file and replace {{placeholders}} with real values
-const renderTemplate = (templateName, variables) => {
+const renderTemplate = (templateName, variables , lang ) => {
   const filePath = path.join(__dirname, '../templates', `${templateName}.html`);
   let html = fs.readFileSync(filePath, 'utf8');
 
@@ -41,35 +41,35 @@ const sendEmail = async ({ to, subject, template, variables }) => {
 
 // ── Specific email senders ─────────────────────────────────
 
-const sendVerificationEmail = (user, verificationUrl) =>
+const sendVerificationEmail = (user, verificationUrl , lang= 'ar') =>
   sendEmail({
     to: user.email,
-    subject: 'Verify your email address',
-    template: 'emailVerification',
+    subject: t(lang, 'EMAIL_SUBJECT_VERIFY'),
+    template: lang === 'ar' ? 'emailVerification-ar' : 'emailVerification',
     variables: { name: user.name, verificationUrl },
   });
 
-const sendPasswordResetEmail = (user, resetUrl) =>
+const sendPasswordResetEmail = (user, resetUrl, lang = 'ar') =>
   sendEmail({
     to: user.email,
-    subject: 'Reset your password',
-    template: 'passwordReset',
+    subject: t(lang, 'EMAIL_SUBJECT_RESET'),
+    template: lang === 'ar' ? 'passwordReset-ar' : 'passwordReset',
     variables: { name: user.name, resetUrl },
   });
 
-const sendEmailChangeEmail = (toEmail, user, changeUrl) =>
+const sendEmailChangeEmail = (toEmail, user, changeUrl,lang='ar') =>
   sendEmail({
     to: toEmail,
-    subject: 'Confirm your new email address',
-    template: 'changeEmail',
+    subject: t(lang, 'EMAIL_SUBJECT_CHANGE_EMAIL'),
+    template: lang === 'ar' ? 'changeEmail-ar' : 'changeEmail',
     variables: { name: user.name, changeUrl, newEmail: toEmail },
   });
 
-const sendSecurityAlertEmail = (user, action) =>
+const sendSecurityAlertEmail = (user, action, lang = 'ar') =>
   sendEmail({
     to: user.email,
-    subject: `Security alert: ${action}`,
-    template: 'securityAlert',
+    subject: t(lang, 'EMAIL_SUBJECT_SECURITY_ALERT', { action }),
+    template: lang === 'ar' ? 'securityAlert-ar' : 'securityAlert',
     variables: {
       name: user.name,
       action,
@@ -78,11 +78,11 @@ const sendSecurityAlertEmail = (user, action) =>
     },
   });
 
-  const sendDeleteAccountEmail = (user, rawToken) =>
+  const sendDeleteAccountEmail = (user, rawToken, lang = 'ar') =>
   sendEmail({
     to: user.email,
-    subject: 'Account deletion request',
-    template: 'accountDeletion',
+    subject: t(lang, 'EMAIL_SUBJECT_DELETE_ACCOUNT'),
+    template: lang === 'ar' ? 'accountDeletion-ar' : 'accountDeletion',
     variables: {
       name: user.name,
       action: 'Account Deletion Requested',

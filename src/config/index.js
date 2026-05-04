@@ -57,6 +57,8 @@ const config = {
 
   // Security lock duration after password/email/phone change
   securityLockHours: parseInt(process.env.SECURITY_LOCK_HOURS) || 24,
+  // Account deletion grace period (time before permanent deletion after user requests account deletion)
+  deletionGraceHours: parseInt(process.env.DELETION_GRACE_HOURS) || 24,
 };
 
 // Make sure the critical values are set before the app starts
