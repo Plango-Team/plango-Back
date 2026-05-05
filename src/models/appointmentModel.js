@@ -17,7 +17,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["work", "personal", "health", "other"],
+      enum: ["work", "personal", "travel", "other"],
       default: "personal",
     },
     userId: {
@@ -66,6 +66,10 @@ const appointmentSchema = new mongoose.Schema(
     repeatUntil: {
       type: Date,
     },
+    recurrenceId: { 
+      type: mongoose.Schema.Types.ObjectId,
+  index: true
+},
     status: {
       type: String,
       enum: ["scheduled", "completed", "canceled"],
@@ -75,7 +79,7 @@ const appointmentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-appointmentSchema.index({ userId: 1, arrivalTime: 1 });
+appointmentSchema.index({ userId: 1, arrivalTime: 1 },{unique: true});
 appointmentSchema.index({ userId: 1, status: 1 });
 appointmentSchema.index({ isRecurring: 1 });
 
