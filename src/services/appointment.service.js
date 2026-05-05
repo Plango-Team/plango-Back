@@ -90,7 +90,7 @@ const getAppointmentSeries = async ({ appointmentId, userId }) => {
     return await Appointment.find({
     recurrenceId: appointment.recurrenceId,
     userId,
-  }).sort({ arrivalTime: 1 });
+    }).sort({ arrivalTime: 1 });
 };
 const updateAppointment = async ({id, userId,data}) => {
     const appointment = await Appointment.findOneAndUpdate({_id: id, userId}, data, {

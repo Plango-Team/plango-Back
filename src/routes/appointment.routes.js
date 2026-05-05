@@ -9,7 +9,7 @@ const v = require("../validators/appointment.validators");
 router.use(protect);
 router.post("/", v.createAppointment,validate, appointmentController.createAppointment);
 router.get("/", v.getAppointmentsValidator,validate, appointmentController.getAppointments);
-router.get("/series/:id", appointmentController.getAppointmentSeries);
+//router.get("/series/:id",v.getAppointmentSeriesValidator,validate, appointmentController.getAppointmentSeries);
 router.get("/:id",  appointmentController.getAppointment);
 router.put("/:id",  v.updateAppointment,validate, appointmentController.updateAppointment);
 router.delete("/:id", appointmentController.deleteAppointment);

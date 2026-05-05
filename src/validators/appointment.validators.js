@@ -8,21 +8,23 @@ const statusTypes = ["scheduled", "completed", "canceled"];
 
 // Location validator helper
 const locationValidator = (fieldName) => [
-    body(`${fieldName}.address`)
-    .trim()
-    .notEmpty()
-    .withMessage(`${fieldName} address is required`),
+    body(`${fieldName}.addressName`)
+    .optional()
+    .isString()
+    .withMessage(`${fieldName} addressName must be a string`),
 
-    body(`${fieldName}.coordinates.lat`)
-    .isFloat()
-    .withMessage(`${fieldName} latitude must be a number`),
+    body(`${fieldName}.coordinates`)
+    .isArray({ min: 2, max: 2 })
+    .withMessage(`${fieldName} coordinates must be [lng, lat]`),
 
-    body(`${fieldName}.coordinates.lng`)
+    body(`${fieldName}.coordinates.0`)
     .isFloat()
     .withMessage(`${fieldName} longitude must be a number`),
+
+    body(`${fieldName}.coordinates.1`)
+    .isFloat()
+    .withMessage(`${fieldName} latitude must be a number`),
 ];
-
-
 // Create Appointment validator
 const createAppointment = [
     body('title')
@@ -132,10 +134,16 @@ const getAppointmentsValidator = [
     .isIn(["work", "personal", "travel", "other"])
     .withMessage("Invalid category"),
 ];
+const getAppointmentSeriesValidator = [
+    param("id")
+    .isMongoId()
+    .withMessage("Invalid appointment id"),
+];
 
 module.exports = {
     createAppointment,
     updateAppointment,
     getAppointment,
     getAppointmentsValidator,
+    getAppointmentSeriesValidator
 };
