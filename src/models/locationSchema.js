@@ -1,23 +1,42 @@
 const locationSchema = new mongoose.Schema(
   {
-    address: {
+    addressName: {
       type: String,
-      required: true,
       trim: true,
     },
+
+    fullAddress: {
+      type: String,
+      trim: true,
+    },
+
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+      default: "Point",
+    },
+
     coordinates: {
-      lat: {
-        type: Number,
-        required: true,
+      type: [Number],
+      required: [true, "Coordinates (Long/Lat) are required"],
+      validate: {
+        validator: function (val) {
+          return (
+            val.length === 2 &&
+            Math.abs(val[0]) <= 180 &&
+            Math.abs(val[1]) <= 90
+          );
+        },
+        message: "Invalid coordinates format. Use [Longitude, Latitude].",
       },
-      lng: {
-        type: Number,
-        required: true,
-      },
+    },
+
+    placeId: {
+      type: String,
     },
   },
   { _id: false },
 );
-locationSchema.index({ "coordinates.lat": 1, "coordinates.lng": 1 });
 
 module.exports = locationSchema;
