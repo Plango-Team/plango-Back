@@ -37,12 +37,12 @@ const appointmentSchema = new mongoose.Schema(
     },
     estimatedTravelTime: {
       type: Number,
-      required: [true, "estimated travel time is required"],
     },
     arrivalTime: {
       type: Date,
       required: [true, "arrival time is required"],
     },
+    actualDepartureTime: { type: Date },
     startLocation: {
       type: locationSchema,
       required: [true, "start location is required"],
@@ -50,10 +50,6 @@ const appointmentSchema = new mongoose.Schema(
     destinationLocation: {
       type: locationSchema,
       required: [true, "destination location is required"],
-    },
-    coordinates: {
-      type: Object,
-      required: [true, "coordinates are required"],
     },
     isRecurring: {
       type: Boolean,
@@ -68,13 +64,8 @@ const appointmentSchema = new mongoose.Schema(
     },
     recurrenceId: { 
       type: mongoose.Schema.Types.ObjectId,
-  index: true
+      index: true
 },
-    status: {
-      type: String,
-      enum: ["scheduled", "completed", "canceled"],
-      default: "scheduled",
-    },
   },
   { timestamps: true },
 );
@@ -84,28 +75,49 @@ appointmentSchema.index({ userId: 1, status: 1 });
 appointmentSchema.index({ isRecurring: 1 });
 
 // ── Virtuals ─────────────────────────────────────────────
-appointmentSchema.virtual("isPast").get(function () {
-  return this.appointmentTime < new Date();
+appointmentSchema.virtual("suggestedDepartureTime").get(function () {
+  if (!this.arrivalTime || !this.estimatedTravelTime) return null;
+  return new Date(
+    this.arrivalTime.getTime() - this.estimatedTravelTime * 60 * 1000,
+  );
+});
+
+appointmentSchema.virtual("Status").get(function () {
+  if (this.isCompleted) {
+    return "completed";
+  }
+  if (this.arrivalTime < new Date()) {
+    return "missed";
+  }
+  return "scheduled";
 });
 
 appointmentSchema.virtual("travelHours").get(function () {
-  return +(this.estimatedTravelDuration / 60).toFixed(1);
+  return +(this.estimatedTravelTime / 60).toFixed(1);
 });
 
+// ── Instance Methods ─────────────────────────────────────
+
+appointmentSchema.methods.calculateTravelTime = async function () {
+  const mapsService = require("../services/maps.service");
+
+  const travelData = await mapsService.getTravelEstimate(
+    this.startLocation.coordinates,
+    this.destinationLocation.coordinates,
+    this.transportation,
+  );
+
+  this.estimatedTravelTime = travelData.durationMinutes;
+  return this.estimatedTravelTime;
+};
 // ── Validation Hooks ─────────────────────────────────────
 appointmentSchema.pre("save", function (next) {
-  if (this.isRecurring && !this.repeatType) {
-    return next(
-      new Error("Repeat type is required for recurring appointments"),
-    );
+  if (this.isNew && this.arrivalTime < new Date()) {
+    return next(new Error("Arrival time cannot be in the past"));
   }
 
-  if (
-    this.repeatUntil &&
-    this.appointmentTime &&
-    this.repeatUntil < this.appointmentTime
-  ) {
-    return next(new Error("Repeat until date must be after appointment date"));
+  if (this.arrivalTime < new Date() && this.status === "scheduled") {
+    this.status = "missed";
   }
 
   next();
