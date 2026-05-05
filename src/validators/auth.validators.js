@@ -1,4 +1,5 @@
 const { body, query } = require('express-validator');
+const { validate } = require('../models/user.model');
 
 // Reusable field validators
 const nameField = body('name')
@@ -109,4 +110,6 @@ module.exports = {
   validateConfirmPhoneChange: [otpField],
 
   validateResendVerification: [emailField()],
+
+  validateUpdateName: [nameField],
 };
