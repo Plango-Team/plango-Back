@@ -70,7 +70,7 @@ app.get('/health', (_req, res) => {
 
 // ── Routes ────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
-
+app.use('/api/appointments', appointmentRoutes);
 // ── 404 Handler ───────────────────────────────────────────
 app.all('*', (req, res) => {
   res.status(404).json({
