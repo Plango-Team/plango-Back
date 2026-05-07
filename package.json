@@ -1,13 +1,14 @@
 {
-  "name": "auth-simple",
+  "name": "plango",
   "version": "1.0.0",
-  "description": "Simple production-ready authentication system",
+  "description": "plango backend producion ready",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "axios": "^1.16.0",
     "bcryptjs": "^3.0.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",

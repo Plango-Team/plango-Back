@@ -14,7 +14,7 @@ const cookieParser = require('cookie-parser');
 const { config, checkRequired } = require('./config');
 const setupPassport = require('./config/passport');
 const authRoutes = require('./routes/auth.routes');
-const { errorHandler, rateLimiters } = require('./middlewares');
+const { errorHandler, rateLimiters , detectLanguage } = require('./middlewares');
 
 // Crash early if required env variables are missing
 checkRequired();
@@ -53,6 +53,8 @@ app.use(morgan(config.isProd ? 'tiny' : 'dev'));
 app.use(mongoSanitize()); // prevents NoSQL injection: { "$gt": "" }
 app.use(xssClean());      // strips HTML tags from input
 app.use(hpp());           // prevents ?sort=name&sort=email pollution
+
+app.use(detectLanguage); // detect user language for i18n
 
 // ── Passport (Google OAuth) ───────────────────────────────
 setupPassport();
