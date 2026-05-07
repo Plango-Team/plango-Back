@@ -1,11 +1,23 @@
 const { body, query } = require('express-validator');
-const { validate } = require('../models/user.model');
 
 // Reusable field validators
 const nameField = body('name')
   .trim()
   .notEmpty().withMessage('Name is required')
-  .isLength({ min: 2, max: 80 }).withMessage('Name must be 2–80 characters');
+  .isLength({ min: 3, max: 80 }).withMessage('Name must be 3–80 characters');
+
+const bioField = body('bio')
+  .optional()
+  .trim()
+  .isLength({ max: 120 }).withMessage('Bio cannot exceed 120 characters');
+
+
+const usernameField = (field = 'username') =>
+  body(field)
+  .trim()
+  .notEmpty().withMessage('Username is required')
+  .isLength({ min: 4, max: 30 }).withMessage('Username must be 4–30 characters')
+  .matches(/^[a-zA-Z0-9]+$/).withMessage('Username can only contain letters and numbers');
 
 const emailField = (field = 'email') =>
   body(field)
@@ -64,8 +76,10 @@ const confirmPasswordField = (matchField = 'newPassword') =>
 module.exports = {
   validateRegister: [
     nameField,
+    bioField,
     emailField(),
     passwordField(),
+    usernameField(),
     phoneField('phone').optional({ checkFalsy: true }),
     body('role').optional().isIn(['user', 'org', 'admin']).withMessage('Invalid role'),
   ],
@@ -112,4 +126,6 @@ module.exports = {
   validateResendVerification: [emailField()],
 
   validateUpdateName: [nameField],
+
+  validateCheckUsername: [usernameField()]
 };

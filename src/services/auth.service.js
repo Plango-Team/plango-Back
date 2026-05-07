@@ -40,7 +40,7 @@ const checkCooldown = (allowedAt, actionLabel, lang) => {
 // ── Auth Actions ──────────────────────────────────────────
 
 // Register a new user
-const register = async ({ name, email, password, role = 'user', phone  ,lang}) => {
+const register = async ({ name, email, password, role = 'user', phone, location, lang }) => {
   // Make sure no one already has this email
   const existing = await User.findOne({ email });
   if (existing) {
@@ -61,6 +61,7 @@ const register = async ({ name, email, password, role = 'user', phone  ,lang}) =
     provider: 'local',
     emailVerificationToken: hashedToken,
     emailVerificationExpires: hoursFromNow(24),
+    location,
   });
 
   // Send verification link with the raw token
@@ -373,6 +374,11 @@ const deleteAccount = async (userId, password, lang) => {
 
 };
 
+const checkUsername = async (username) => {
+  const taken = await User.exists({ username: username });
+  return !taken;
+};
+
 module.exports = {
   register,
   verifyEmail,
@@ -392,4 +398,5 @@ module.exports = {
   confirmPhoneChange,
   getProfile,
   deleteAccount,
+  checkUsername
 };
