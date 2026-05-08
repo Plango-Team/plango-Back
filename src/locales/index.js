@@ -107,7 +107,8 @@ const locales = {
     PENDING_FOLLOW_REQUESTS_RETRIEVED: 'Pending follow requests retrieved.',
     FOLLOW_ALREADY_EXISTS:       'Follow relationship already exists.',
     PENDING:                    'Pending',
-    FOLLOW_REQUEST_SENT:         'Follow request sent.'
+    FOLLOW_REQUEST_SENT:         'Follow request sent.',
+    FOLLOW_REQUEST_CANCELLED:      'Follow request canceled',
   },
 
   ar: {
@@ -210,7 +211,8 @@ const locales = {
     PENDING_FOLLOW_REQUESTS_RETRIEVED: 'تم استرجاع طلبات المتابعة المعلقة.',
     FOLLOW_ALREADY_EXISTS:      "علاقة المتابعة موجودة بالفعل.",
     PENDING:                    'معلق',
-    FOLLOW_REQUEST_SENT:         'تم إرسال طلب المتابعة.'
+    FOLLOW_REQUEST_SENT:         'تم إرسال طلب المتابعة.',
+    FOLLOW_REQUEST_CANCELLED:      'تم إلغاء طلب المتابعة.',
   },
 };
 

@@ -124,7 +124,7 @@ const getFollowing = async (userId, lang) => {
 
 const getPendingFollowRequests = async (userId, lang) => {
 
-  console.log('Getting pending follow requests for user:', userId);
+  // console.log('Getting pending follow requests for user:', userId);
   const pendingRequests = await Follow.find({
     following: userId,
     status: 'pending',

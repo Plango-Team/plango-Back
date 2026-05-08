@@ -18,13 +18,16 @@ const followUser = catchAsync(async (req, res) => {
 
 const unfollowUser = catchAsync(async (req, res) => {
 
-  await followService.unfollowUser(
+  const deletedFollow = await followService.unfollowUser(
     req.user._id.toString(),
     req.params.id,
     req.lang
   );
-
+  if(deletedFollow.status === 'pending') {
+    sendSuccess(res, 200, t(req.lang, 'FOLLOW_REQUEST_CANCELLED'));
+  } else {
   sendSuccess(res, 200, t(req.lang, 'UNFOLLOW_SUCCESS'));
+  }
 });
 
 const acceptFollowRequest = catchAsync(async (req, res) => {
