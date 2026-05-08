@@ -4,29 +4,41 @@ const taskSchema = new mongoose.Schema({
   title: {
     type: String,
     require: [true, "task should have title"],
+    trim: true,
+    minlength: [3, "task title should be at least 3 characters"],
+    maxlength: [120, "task title should be at most 120 characters"],
   },
   description: {
     type: String,
-    require: [true, "task should have discription"],
+    trim: true,
+    maxlength: [200, "task description should be at most 200 characters"],
   },
   deadline: {
     type: Date,
     require: [true, "task should have Deadline date"],
   },
-  isComplete: {
-    type: Boolean,
-    default: false,
+  status: {
+    type: String,
+    require: [true, "task should have status"],
+    enum: ["pending", "completed" , "lated"],
+    default: "pending",
   },
   reminderTime: {
     type: Date,
   },
-  priorty: {
+  priority: {
     type: String,
-    require: [true, "task should have priorty"],
+    require: [true, "task should have priority"],
+    enum: ["low", "medium", "high"],
   },
-  CreatedAt: {
-    type: Date,
-    default: Date.now,
+  linkedAppointment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Appointment",
+  },
+  owner : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: [true, "task should have an owner"],
   },
 });
 

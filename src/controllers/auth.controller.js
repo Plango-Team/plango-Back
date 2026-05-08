@@ -1,4 +1,3 @@
-
 const authService = require('../services/auth.service');
 const { catchAsync, sendSuccess } = require('../utils/helpers');
 const { config } = require('../config');
@@ -7,8 +6,8 @@ const { t } = require('../utils/i18n');
 // ── Registration ──────────────────────────────────────────
 
 exports.register = catchAsync(async (req, res) => {
-  const { name, email, password, role, phone } = req.body;
-  const user = await authService.register({ name, email, password, role, phone } , req.lang);
+  const { name, email, password, role, phone , location , isPrivate , username , bio} = req.body;
+  const user = await authService.register({ name, email, password, role, phone, location, isPrivate, username, bio } , req.lang);
   sendSuccess(res, 201, t(req.lang, 'REGISTER_SUCCESS'), { user });
 });
 
@@ -127,4 +126,10 @@ exports.updateName = catchAsync(async (req, res) => {
 exports.deleteAccount = catchAsync(async (req, res) => {
   await authService.deleteAccount(req.user._id, req.body.password, req.lang);
   sendSuccess(res, 200, t(req.lang, 'ACCOUNT_DELETED'));
+});
+
+
+exports.checkUsername = catchAsync(async (req, res) => {
+  const isAvailable = await authService.checkUsername(req.query.username);
+  sendSuccess(res, 200, t(req.lang, 'USERNAME_CHECKED'), { isAvailable });
 });

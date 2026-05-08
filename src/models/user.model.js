@@ -9,8 +9,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Name is required'],
       trim: true,
-      minlength: [2, 'Name must be at least 2 characters'],
+      minlength: [3, 'Name must be at least 3 characters'],
       maxlength: [20, 'Name cannot exceed 20 characters'],
+    },
+
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      trim: true,
+      minlength: [4, 'Username must be at least 4 characters'],
+      maxlength: [30, 'Username cannot exceed 30 characters'],
+      match: [/^[a-zA-Z0-9]+$/, 'Username can only contain letters and numbers'],
     },
 
     email: {
@@ -20,12 +29,27 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
+    
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
+
+    bio: {
+      type: String,
+      maxlength: [120, 'Bio cannot exceed 120 characters'],
+    },
 
     // Password is hidden by default (select: false) for security
     password: {
       type: String,
       minlength: [8, 'Password must be at least 8 characters'],
       select: false,
+    },
+
+    location: {
+      type: String,
+      maxlength: [15, 'Location cannot exceed 15 characters'],
     },
 
     // ── Login Provider ────────────────────────────────────
@@ -108,6 +132,7 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ email: 1 } , { unique: true , partialFilterExpression: { isActive: { $eq: true } } } );
 userSchema.index({ googleId: 1 }, { unique: true, partialFilterExpression: { googleId: { $type: "string" }, isActive: { $eq: true } } }); 
 userSchema.index({ phone: 1 }, { unique: true, partialFilterExpression: { phone: { $type: "string" }, isActive: { $eq: true } } }); // unique phone when set
+userSchema.index({ username: 1 }, { unique: true, partialFilterExpression: { username: { $type: "string" }, isActive: { $eq: true } } }); // unique username when set
 
 // ── Cooldown helpers ──────────────────────────────────────
 // can be performed again. Returns 0 when the cooldown has passed.
@@ -191,6 +216,10 @@ userSchema.methods.toSafeObject = function () {
     name: this.name,
     email: this.email,
     role: this.role,
+    location: this.location,
+    bio: this.bio,
+    username: this.username,
+    isPrivate: this.isPrivate,
     provider: this.provider,
     phone: this.phone,
     isEmailVerified: this.isEmailVerified,

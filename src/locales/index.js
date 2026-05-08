@@ -93,6 +93,21 @@ const locales = {
     NAME_UPDATED:              'Name updated successfully.',
     ACCOUNT_DELETED:           'Account deleted. We\'re sorry to see you go!',
     DUPLICATE_FIELD:           '{{field}} already exists.',
+    USERNAME_CHECKED:          'Username availability checked.',
+
+    // ── Follow subjects ────────────────────────────────────────
+    YOU_CANNOT_FOLLOW_SELF:        'You cannot follow yourself.',
+    FOLLOW_REQUEST_NOT_FOUND:        'Follow request not found.',
+    FOLLOW_SUCCESS:              'Followed successfully.',
+    UNFOLLOW_SUCCESS:            'Unfollowed successfully.',
+    ACCEPT_FOLLOW_REQUEST:       'Follow request accepted.',
+    REJECT_FOLLOW_REQUEST:       'Follow request rejected.',
+    FOLLOWERS_RETRIEVED:         'Followers retrieved.',
+    FOLLOWING_RETRIEVED:         'Following retrieved.',
+    PENDING_FOLLOW_REQUESTS_RETRIEVED: 'Pending follow requests retrieved.',
+    FOLLOW_ALREADY_EXISTS:       'Follow relationship already exists.',
+    PENDING:                    'Pending',
+    FOLLOW_REQUEST_SENT:         'Follow request sent.'
   },
 
   ar: {
@@ -181,6 +196,21 @@ const locales = {
     NAME_UPDATED:              'تم تحديث الاسم بنجاح.',
     ACCOUNT_DELETED:           'تم حذف الحساب. نأسف لرؤيتك ترحل!',
     DUPLICATE_FIELD:           '{{field}} موجود بالفعل.',
+    USERNAME_CHECKED:          'تم التحقق من توفر اسم المستخدم.',
+
+    // ── Follow subjects ────────────────────────────────────────
+    YOU_CANNOT_FOLLOW_SELF:        'لا يمكنك متابعة نفسك.',
+    FOLLOW_REQUEST_NOT_FOUND:        'طلب المتابعة غير موجود.',
+    FOLLOW_SUCCESS:              'تم المتابعة بنجاح.',
+    UNFOLLOW_SUCCESS:            'تم إلغاء المتابعة بنجاح.',
+    ACCEPT_FOLLOW_REQUEST:       'تم قبول طلب المتابعة.',
+    REJECT_FOLLOW_REQUEST:       'تم رفض طلب المتابعة.',
+    FOLLOWERS_RETRIEVED:         'تم استرجاع المتابعين.',
+    FOLLOWING_RETRIEVED:         'تم استرجاع المتابعين الذين تتابعهم.',
+    PENDING_FOLLOW_REQUESTS_RETRIEVED: 'تم استرجاع طلبات المتابعة المعلقة.',
+    FOLLOW_ALREADY_EXISTS:      "علاقة المتابعة موجودة بالفعل.",
+    PENDING:                    'معلق',
+    FOLLOW_REQUEST_SENT:         'تم إرسال طلب المتابعة.'
   },
 };
 

@@ -97,6 +97,8 @@ router.delete('/delete-account',
   ctrl.deleteAccount
 );
 
+router.get('/check-username', v.validateCheckUsername, validate, ctrl.checkUsername);
+
 router.patch('/update-name',
   protect,
   ...nameChange,
