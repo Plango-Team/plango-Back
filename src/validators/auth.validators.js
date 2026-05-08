@@ -40,7 +40,6 @@ const passwordField = (field = 'password') =>
 const phoneField = (field = 'phone') =>
   body(field)
     .trim()
-    .notEmpty().withMessage('Phone number is required')
     .matches(/^\+[1-9]\d{6,14}$/).withMessage('Phone must be in international format e.g. +12025551234');
 
 // OTP is always exactly 6 digits
