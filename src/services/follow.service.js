@@ -4,16 +4,16 @@ const AppError = require('../utils/appError');
 const { t } = require('../utils/i18n');
 
 
-const followUser = async (currentUserId, targetUserId) => {
+const followUser = async (currentUserId, targetUserId, lang) => {
 
   if (currentUserId === targetUserId) {
-    throw new AppError(t('YOU_CANNOT_FOLLOW_SELF'), 400);
+    throw new AppError(t(lang, 'YOU_CANNOT_FOLLOW_SELF'), 400);
   }
 
   const targetUser = await User.findById(targetUserId);
 
   if (!targetUser) {
-    throw new AppError(t('NOT_FOUND'), 404);
+    throw new AppError(t(lang, 'NOT_FOUND'), 404);
   }
 
   const alreadyExists = await Follow.exists({
@@ -22,7 +22,7 @@ const followUser = async (currentUserId, targetUserId) => {
   });
 
   if (alreadyExists) {
-    throw new AppError(t('Follow request already exists'), 400);
+    throw new AppError(t(lang, 'FOLLOW_ALREADY_EXISTS'), 400);
   }
 
   const status = targetUser.isPrivate
@@ -38,7 +38,7 @@ const followUser = async (currentUserId, targetUserId) => {
   return follow;
 };
 
-const unfollowUser = async (currentUserId, targetUserId) => {
+const unfollowUser = async (currentUserId, targetUserId, lang) => {
 
   const deletedFollow = await Follow.findOneAndDelete({
     follower: currentUserId,
@@ -46,7 +46,7 @@ const unfollowUser = async (currentUserId, targetUserId) => {
   });
 
   if (!deletedFollow) {
-    throw new AppError(t('Follow relationship not found'), 404);
+    throw new AppError(t(lang, 'FOLLOW_REQUEST_NOT_FOUND'), 404);
   }
 
   return deletedFollow;
@@ -54,17 +54,18 @@ const unfollowUser = async (currentUserId, targetUserId) => {
 
 const acceptFollowRequest = async (
   currentUserId,
-  followId
+  followId,
+  lang
 ) => {
 
   const follow = await Follow.findById(followId);
 
   if (!follow) {
-    throw new AppError(t('FOLLOW_REQUEST_NOT_FOUND'), 404);
+    throw new AppError(t(lang, 'FOLLOW_REQUEST_NOT_FOUND'), 404);
   }
 
   if (follow.following.toString() !== currentUserId) {
-    throw new AppError(t('Unauthorized'), 403);
+    throw new AppError(t(lang, 'Unauthorized'), 403);
   }
 
   follow.status = 'accepted';
@@ -76,17 +77,18 @@ const acceptFollowRequest = async (
 
 const rejectFollowRequest = async (
   currentUserId,
-  followId
+  followId,
+  lang
 ) => {
 
   const follow = await Follow.findById(followId);
 
   if (!follow) {
-    throw new AppError(t('FOLLOW_REQUEST_NOT_FOUND'), 404);
+    throw new AppError(t(lang, 'FOLLOW_REQUEST_NOT_FOUND'), 404);
   }
 
   if (follow.following.toString() !== currentUserId) {
-    throw new AppError(t('Unauthorized'), 403);
+    throw new AppError(t(lang, 'Unauthorized'), 403);
   }
 
   await follow.deleteOne();
@@ -94,7 +96,7 @@ const rejectFollowRequest = async (
   return true;
 };
 
-const getFollowers = async (userId) => {
+const getFollowers = async (userId, lang) => {
 
   const followers = await Follow.find({
     following: userId,
@@ -107,7 +109,7 @@ const getFollowers = async (userId) => {
   return followers;
 };
 
-const getFollowing = async (userId) => {
+const getFollowing = async (userId, lang) => {
 
   const following = await Follow.find({
     follower: userId,
@@ -120,14 +122,15 @@ const getFollowing = async (userId) => {
   return following;
 };
 
-const getPendingFollowRequests = async (userId) => {
+const getPendingFollowRequests = async (userId, lang) => {
 
+  console.log('Getting pending follow requests for user:', userId);
   const pendingRequests = await Follow.find({
     following: userId,
     status: 'pending',
   }).populate(
     'follower',
-    'name username'
+    'name username bio'
   ).sort({ createdAt: -1 });
   return pendingRequests;
 };

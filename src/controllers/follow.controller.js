@@ -6,17 +6,22 @@ const followUser = catchAsync(async (req, res) => {
 
   const follow = await followService.followUser(
     req.user._id.toString(),
-    req.params.id
+    req.params.id,
+    req.lang
   );
-
+  if (follow.status === 'pending') {
+    sendSuccess(res, 200, t(req.lang, 'FOLLOW_REQUEST_SENT'), { data: follow });
+  } else {
   sendSuccess(res, 201, t(req.lang, 'FOLLOW_SUCCESS'), { data: follow });
+  }
 });
 
 const unfollowUser = catchAsync(async (req, res) => {
 
   await followService.unfollowUser(
     req.user._id.toString(),
-    req.params.id
+    req.params.id,
+    req.lang
   );
 
   sendSuccess(res, 200, t(req.lang, 'UNFOLLOW_SUCCESS'));
@@ -27,7 +32,8 @@ const acceptFollowRequest = catchAsync(async (req, res) => {
   const follow =
     await followService.acceptFollowRequest(
       req.user._id.toString(),
-      req.params.followId
+      req.params.followId,
+      req.lang
     );
 
   sendSuccess(res, 200, t(req.lang, 'ACCEPT_FOLLOW_REQUEST'), { data: follow });
@@ -37,7 +43,8 @@ const rejectFollowRequest = catchAsync(async (req, res) => {
 
   await followService.rejectFollowRequest(
     req.user._id.toString(),
-    req.params.followId
+    req.params.followId,
+    req.lang
   );
 
   sendSuccess(res, 200, t(req.lang, 'REJECT_FOLLOW_REQUEST'));
@@ -48,7 +55,7 @@ const rejectFollowRequest = catchAsync(async (req, res) => {
 const getFollowers = catchAsync(async (req, res) => {
 
   const followers =
-    await followService.getFollowers(req.params.id);
+    await followService.getFollowers(req.params.id, req.lang);
 
   sendSuccess(res, 200, t(req.lang, 'FOLLOWERS_RETRIEVED'), { data: followers });
 });
@@ -56,7 +63,7 @@ const getFollowers = catchAsync(async (req, res) => {
 const getFollowing = catchAsync(async (req, res) => {
 
   const following =
-    await followService.getFollowing(req.params.id);
+    await followService.getFollowing(req.params.id, req.lang);
 
   sendSuccess(res, 200, t(req.lang, 'FOLLOWING_RETRIEVED'), { data: following });
 });
@@ -66,7 +73,7 @@ const getFollowing = catchAsync(async (req, res) => {
 const getPendingFollowRequests = catchAsync(async (req, res) => {
 
   const pendingRequests =
-    await followService.getPendingFollowRequests(req.params.id);
+    await followService.getPendingFollowRequests(req.user._id.toString(), req.lang);
 
   sendSuccess(res, 200, t(req.lang, 'PENDING_FOLLOW_REQUESTS_RETRIEVED'), { data: pendingRequests });
 });

@@ -105,6 +105,9 @@ const locales = {
     FOLLOWERS_RETRIEVED:         'Followers retrieved.',
     FOLLOWING_RETRIEVED:         'Following retrieved.',
     PENDING_FOLLOW_REQUESTS_RETRIEVED: 'Pending follow requests retrieved.',
+    FOLLOW_ALREADY_EXISTS:       'Follow relationship already exists.',
+    PENDING:                    'Pending',
+    FOLLOW_REQUEST_SENT:         'Follow request sent.'
   },
 
   ar: {
@@ -205,6 +208,9 @@ const locales = {
     FOLLOWERS_RETRIEVED:         'تم استرجاع المتابعين.',
     FOLLOWING_RETRIEVED:         'تم استرجاع المتابعين الذين تتابعهم.',
     PENDING_FOLLOW_REQUESTS_RETRIEVED: 'تم استرجاع طلبات المتابعة المعلقة.',
+    FOLLOW_ALREADY_EXISTS:      "علاقة المتابعة موجودة بالفعل.",
+    PENDING:                    'معلق',
+    FOLLOW_REQUEST_SENT:         'تم إرسال طلب المتابعة.'
   },
 };
 

@@ -6,8 +6,8 @@ const { t } = require('../utils/i18n');
 // ── Registration ──────────────────────────────────────────
 
 exports.register = catchAsync(async (req, res) => {
-  const { name, email, password, role, phone , location} = req.body;
-  const user = await authService.register({ name, email, password, role, phone, location } , req.lang);
+  const { name, email, password, role, phone , location , isPrivate , username , bio} = req.body;
+  const user = await authService.register({ name, email, password, role, phone, location, isPrivate, username, bio } , req.lang);
   sendSuccess(res, 201, t(req.lang, 'REGISTER_SUCCESS'), { user });
 });
 

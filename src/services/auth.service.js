@@ -1,4 +1,5 @@
 const User = require('../models/user.model');
+const Follow = require('../models/followModel');
 const AppError = require('../utils/AppError');
 const { hashValue, randomToken, signToken, hoursFromNow } = require('../utils/helpers');
 const { sendOtp, verifyOtp } = require('./otp.service');
@@ -40,7 +41,7 @@ const checkCooldown = (allowedAt, actionLabel, lang) => {
 // ── Auth Actions ──────────────────────────────────────────
 
 // Register a new user
-const register = async ({ name, email, password, role = 'user', phone, location, lang }) => {
+const register = async ({ name, email, password, role = 'user', phone, location, lang , isPrivate , username, bio}) => {
   // Make sure no one already has this email
   const existing = await User.findOne({ email });
   if (existing) {
@@ -62,6 +63,9 @@ const register = async ({ name, email, password, role = 'user', phone, location,
     emailVerificationToken: hashedToken,
     emailVerificationExpires: hoursFromNow(24),
     location,
+    isPrivate,
+    username,
+    bio,
   });
 
   // Send verification link with the raw token
@@ -345,7 +349,20 @@ const confirmPhoneChange = async (userId, submittedOtp, lang) => {
 const getProfile = async (userId, lang) => {
   const user = await User.findById(userId);
   if (!user) throw new AppError(t(lang, 'NOT_FOUND'), 404, 'NOT_FOUND');
-  return user.toSafeObject();
+
+  const [followersCount, followingCount] = await Promise.all([
+    Follow.countDocuments({
+      following: user._id,
+      status: 'accepted',
+    }),
+
+    Follow.countDocuments({
+      follower: user._id,
+      status: 'accepted',
+    }),
+  ]);
+
+  return { ...user.toSafeObject(), followersCount, followingCount };
 };
 
 const updateName = async (userId, newName, lang) => {

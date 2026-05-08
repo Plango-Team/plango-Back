@@ -1,4 +1,4 @@
-const User = require("../models/userModel");
+const User = require("../models/user.model");
 const AppError = require("../utils/appError");
 const catchAsync = require("express-async-handler");
 const Follow = require("../models/followModel");
@@ -16,9 +16,10 @@ exports.getUsers = catchAsync(async (req, res) => {
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {
+  const lang = req.lang;
   const user = await User.findById(req.params.id);
   if (!user) {
-    return next(new AppError("No user found with that ID", 404));
+    return next(new AppError(t(lang, 'NOT_FOUND'), 404));
   }
   res.status(200).json({
     status: "success",
@@ -39,12 +40,13 @@ exports.createUser = catchAsync(async (req, res) => {
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
+  const lang = req.lang;
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
   if (!user) {
-    return next(new AppError("No user found with that ID", 404));
+    return next(new AppError(t(lang, 'NOT_FOUND'), 404));
   }
   res.status(200).json({
     status: "success",
@@ -55,9 +57,10 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteUser = catchAsync(async (req, res, next) => {
+  const lang = req.lang;
   const user = await User.findByIdAndDelete(req.params.id);
   if (!user) {
-    return next(new AppError("No user found with that ID", 404));
+    return next(new AppError(t(lang, 'NOT_FOUND'), 404));
   }
   res.status(200).json({
     status: "success",
@@ -66,7 +69,7 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 
 
 exports.searchUsers = catchAsync(async (req, res) => {
-  const search = req.query.search;
+  const search = req.query.search.toString().trim();
 
   const users = await User.find({
     $or: [
@@ -129,7 +132,7 @@ exports.searchUsers = catchAsync(async (req, res) => {
   });
 });
 
-exports.getUserProfile = catchAsync(async (req, res) => {
+exports.getUserProfile = catchAsync(async (req, res , next) => {
 
   const user = await User.findById(req.params.id)
     .select(
