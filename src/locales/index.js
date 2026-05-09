@@ -109,6 +109,21 @@ const locales = {
     PENDING:                    'Pending',
     FOLLOW_REQUEST_SENT:         'Follow request sent.',
     FOLLOW_REQUEST_CANCELLED:      'Follow request canceled',
+
+    // ── task subjects ────────────────────────────────────────
+    TASK_CREATED:                'Task created successfully.',
+    TASK_UPDATED:                'Task updated successfully.',
+    TASK_DELETED:                'Task deleted successfully.',
+    TASK_RETRIEVED:              'Task retrieved successfully.',
+    TASK_NOT_FOUND:              'Task not found.',
+
+    MISSING_DATA:                'Missing required data.',
+    APPOINTMENT_NOT_FOUND:        'Linked appointment not found.',
+    EXPIRED_APPOINTMENT:          'Linked appointment has already occurred.',
+    MISSING_DEADLINE:            'Deadline is required.',
+    TASK_CREATION_FAILED:        'Failed to create task.',
+    TASK_NOT_FOUND:              'Task not found.',
+
   },
 
   ar: {
@@ -213,6 +228,20 @@ const locales = {
     PENDING:                    'معلق',
     FOLLOW_REQUEST_SENT:         'تم إرسال طلب المتابعة.',
     FOLLOW_REQUEST_CANCELLED:      'تم إلغاء طلب المتابعة.',
+
+    // ── task subjects ────────────────────────────────────────
+    TASK_CREATED:                'تم إنشاء المهمة بنجاح.',
+    TASK_UPDATED:                'تم تحديث المهمة بنجاح.',
+    TASK_DELETED:                'تم حذف المهمة بنجاح.',
+    TASK_RETRIEVED:              'تم استرجاع المهمة بنجاح.',
+    TASK_NOT_FOUND:              'المهمة غير موجودة.',
+
+    MISSING_DATA:                'بيانات مطلوبة مفقودة.',
+    MISSING_DEADLINE:            'الموعد النهائي مطلوب.',
+    APPOINTMENT_NOT_FOUND:        'الموعد المرتبط غير موجود.',
+    EXPIRED_APPOINTMENT:          'الموعد المرتبط قد حدث بالفعل.',
+    TASK_CREATION_FAILED:        'فشل في إنشاء المهمة.',
+    TASK_NOT_FOUND:              'المهمة غير موجودة.',
   },
 };
 

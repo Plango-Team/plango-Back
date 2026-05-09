@@ -61,8 +61,15 @@ const updateTask = [
     .withMessage("isComplete must be boolean"),
 ];
 
+const taskIdValidator = [
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid task ID format"),
+];
+
 
 module.exports = {
   createTask,
   updateTask,
+  taskIdValidator
 };

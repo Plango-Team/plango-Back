@@ -1,9 +1,6 @@
 const catchAsync = require("express-async-handler");
-
 const taskService = require("../services/task.service");
-
 const { sendSuccess } = require("../utils/helpers");
-
 const { t } = require("../utils/i18n");
 
 exports.createTask = catchAsync(async (req, res) => {
@@ -16,7 +13,7 @@ exports.createTask = catchAsync(async (req, res) => {
     lang,
   });
 
-  sendSuccess(res, 201, t(lang, "taskCreatedSuccessfully"), { task });
+  sendSuccess(res, 201, t(lang, "TASK_CREATED"), { task });
 });
 
 exports.getTasks = catchAsync(async (req, res) => {
@@ -26,7 +23,7 @@ exports.getTasks = catchAsync(async (req, res) => {
     lang,
   });
 
-  sendSuccess(res, 200, t(lang, "success"), {
+  sendSuccess(res, 200, t(lang, "TASK_RETRIEVED"), {
     results: tasks.length,
     tasks,
   });
@@ -40,7 +37,7 @@ exports.getTask = catchAsync(async (req, res) => {
     lang,
   });
 
-  sendSuccess(res, 200, t(lang, "success"), { task });
+  sendSuccess(res, 200, t(lang, "TASK_RETRIEVED"), { task });
 });
 
 exports.updateTask = catchAsync(async (req, res) => {
@@ -52,7 +49,7 @@ exports.updateTask = catchAsync(async (req, res) => {
     lang,
   });
 
-  sendSuccess(res, 200, t(lang, "taskUpdatedSuccessfully"), { task });
+  sendSuccess(res, 200, t(lang, "TASK_UPDATED"), { task });
 });
 
 exports.deleteTask = catchAsync(async (req, res) => {
@@ -63,7 +60,7 @@ exports.deleteTask = catchAsync(async (req, res) => {
     lang,
   });
 
-  sendSuccess(res, 200, t(lang, "taskDeletedSuccessfully"), null);
+  sendSuccess(res, 200, t(lang, "TASK_DELETED"), null);
 });
 
 exports.getLinkableAppointments = catchAsync(async (req, res) => {
@@ -73,7 +70,7 @@ exports.getLinkableAppointments = catchAsync(async (req, res) => {
     lang,
   });
 
-  sendSuccess(res, 200, t(lang, "success"), {
+  sendSuccess(res, 200, t(lang, "TASK_RETRIEVED"), {
     results: appointments.length,
     appointments,
   });

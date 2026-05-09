@@ -35,16 +35,30 @@ exports.login = catchAsync(async (req, res) => {
 exports.googleCallback = catchAsync(async (req, res) => {
   const result = await authService.googleLogin(req.user , req.lang);
 
-  // Set the JWT in an HTTP-only cookie so JavaScript can't access it
+  //Set the JWT in an HTTP-only cookie so JavaScript can't access it
   res.cookie('token', result.token, {
     httpOnly: true,                          
     secure: config.isProd,                   
-    sameSite: config.isProd ? 'strict' : 'lax', 
+    sameSite: config.isProd ? 'none' : 'lax', 
     maxAge: 7 * 24 * 60 * 60 * 1000,        // 7 days in milliseconds
   });
 
+  
+  // res.cookie('token', result.token, {
+  //   httpOnly: true,
+  //   secure: false,
+  //   sameSite: 'lax',
+  //   maxAge: 7 * 24 * 60 * 60 * 1000,
+  // })
+  // .status(200).json({
+  //   success: true,
+  //   message: 'Login Successful',
+  //   data: result,
+  // });
+
   // Redirect to the client — the cookie travels with the browser automatically
   res.redirect(`${config.clientUrl}/auth/callback`);
+
 });
 
 // ── Password Reset ────────────────────────────────────────

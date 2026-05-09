@@ -1,7 +1,7 @@
-const passport = require('passport');
-const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
-const { config } = require('./index');
-const User = require('../models/user.model');
+const passport = require("passport");
+const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
+const { config } = require("./index");
+const User = require("../models/user.model");
 
 const setupPassport = () => {
   // We don't use sessions — only JWT. So we keep these minimal.
@@ -13,7 +13,7 @@ const setupPassport = () => {
 
   // Skip Google strategy if credentials aren't configured
   if (!config.google.clientId) {
-    console.warn('⚠️  Google OAuth not configured — skipping');
+    console.warn("⚠️  Google OAuth not configured — skipping");
     return;
   }
 
@@ -23,34 +23,45 @@ const setupPassport = () => {
         clientID: config.google.clientId,
         clientSecret: config.google.clientSecret,
         callbackURL: config.google.callbackUrl,
-        scope: ['profile', 'email'],
+        scope: ["profile", "email"],
       },
       async (_accessToken, _refreshToken, profile, done) => {
         try {
           const email = profile.emails?.[0]?.value?.toLowerCase();
-          if (!email) return done(new Error('No email from Google'), null);
+          if (!email) return done(new Error("No email from Google"), null);
 
-          
           // Check if user already exists (by Google ID or email)
-          let user = await User.findOne({ googleId: profile.id });
-          if (!user) user = await User.findOne({ email });
+          let user = await User.findOne({ googleId: profile.id }).select(
+            "+isActive",
+          );
+          if (!user) user = await User.findOne({ email }).select("+isActive");
 
           if (user) {
             // Link Google to existing account if not already linked
             if (!user.googleId) {
               user.googleId = profile.id;
-             // user.provider = 'google';
+              // user.provider = 'google';
               user.isEmailVerified = true;
               await user.save({ validateBeforeSave: false });
             }
             return done(null, user);
           }
+          const baseUsername = email.split("@")[0].toLowerCase();
+
+          let username = baseUsername;
+          let counter = 1;
+
+          while (await User.findOne({ username })) {
+            username = `${baseUsername}${counter}`;
+            counter++;
+          }
 
           // Create a brand new user from Google profile
           user = await User.create({
             name: profile.displayName,
+            username,
             email,
-            provider: 'google',
+            provider: "google",
             googleId: profile.id,
             isEmailVerified: true, // Google already verified their email
           });
@@ -59,8 +70,8 @@ const setupPassport = () => {
         } catch (err) {
           return done(err, null);
         }
-      }
-    )
+      },
+    ),
   );
 };
 
