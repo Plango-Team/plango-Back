@@ -1,6 +1,6 @@
 const https = require("https");
 const { config } = require("../config");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 const twilio = require("twilio");
 
 // ── Twilio (plain text) ───────────────────────────────────

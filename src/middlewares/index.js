@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/user.model');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 const { verifyToken } = require('../utils/helpers');
 const { t, detectLang } = require('../utils/i18n');
 
