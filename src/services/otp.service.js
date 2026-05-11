@@ -1,4 +1,4 @@
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 const { generateOtp, hashValue, minutesFromNow } = require('../utils/helpers');
 const { sendWhatsAppOtp } = require('./whatsapp.service');
 const { config } = require('../config');
