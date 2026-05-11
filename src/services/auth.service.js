@@ -1,6 +1,6 @@
 const User = require('../models/user.model');
 const Follow = require('../models/followModel');
-const AppError = require('../utils/AppError');
+const AppError = require('../utils/appError');
 const { hashValue, randomToken, signToken, hoursFromNow } = require('../utils/helpers');
 const { sendOtp, verifyOtp } = require('./otp.service');
 const emailService = require('./email.service');
