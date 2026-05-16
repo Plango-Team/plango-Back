@@ -32,7 +32,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     transportation: {
       type: String,
-      enum: ["car", "walking", "biking", "other"],
+      enum: ["car", "walking", "driving", "other"],
       required: [true, "transportation method is required"],
     },
     estimatedTravelTime: {
@@ -62,15 +62,18 @@ const appointmentSchema = new mongoose.Schema(
     repeatUntil: {
       type: Date,
     },
-    recurrenceId: { 
+    recurrenceId: {
       type: mongoose.Schema.Types.ObjectId,
-      index: true
-},
+      index: true,
+    },
+    polyline: { type: String },
+    stepsCount: { type: Number, default: null },
+    caloriesBurned: { type: Number, default: null },
   },
   { timestamps: true },
 );
 
-appointmentSchema.index({ userId: 1, arrivalTime: 1 },{unique: true});
+appointmentSchema.index({ userId: 1, arrivalTime: 1 }, { unique: true });
 appointmentSchema.index({ userId: 1, status: 1 });
 appointmentSchema.index({ isRecurring: 1 });
 
@@ -101,14 +104,18 @@ appointmentSchema.virtual("travelHours").get(function () {
 appointmentSchema.methods.calculateTravelTime = async function () {
   const mapsService = require("../services/maps.service");
 
-  const travelData = await mapsService.getTravelEstimate(
+  const routeData = await mapsService.getDetailedRoute(
     this.startLocation.coordinates,
     this.destinationLocation.coordinates,
     this.transportation,
   );
 
-  this.estimatedTravelTime = travelData.durationMinutes;
-  return this.estimatedTravelTime;
+  this.estimatedTravelTime = routeData.durationMinutes;
+  this.polyline = routeData.polyline;
+  this.stepsCount = routeData.stepsCount;
+  this.caloriesBurned = routeData.caloriesBurned;
+
+  return this;
 };
 // ── Validation Hooks ─────────────────────────────────────
 appointmentSchema.pre("save", function (next) {
