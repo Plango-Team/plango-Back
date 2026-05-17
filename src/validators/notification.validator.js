@@ -1,4 +1,4 @@
-const { query, param } = require("express-validator");
+const { body, query, param } = require("express-validator");
 
 exports.getMyNotificationsValidation = [
   query("page")
@@ -21,4 +21,10 @@ exports.markNotificationAsReadValidation = [
   param("id")
     .isMongoId()
     .withMessage("Invalid notification id"),
+];
+
+exports.SaveFcmTokenValidation = [
+  body("fcmToken")
+    .notEmpty()
+    .withMessage("FCM token cannot be empty"),
 ];
